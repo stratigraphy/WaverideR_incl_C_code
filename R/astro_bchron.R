@@ -15,9 +15,9 @@
 #' column 6: calCurve values assign as "G" for a Gaussian distribution
 #' @param n_simulations number of simulation runs
 #' @param track_period_incl_sd A matrix of 3 columns in which the first column
-#' is depth/height.The second column is the period of the tracked cycle.
+#' is depth/height.The second column is the frequency of the tracked cycle.
 #' The thirds column is uncertainty given as 1 standard deviation for the
-#' period of the tracked cycle
+#' frequency of the tracked cycle
 #'@param tracked_cycle_period period in time of the tracked cycle
 #'@param tracked_cycle_period_unc uncertainty in the period of the tracked cycle
 #'@param tracked_cycle_period_unc_dist distribution of the uncertainty of the
@@ -34,7 +34,7 @@
 #'Bisciaro Formation, Contessa Section, Italy: A case study for requisite
 #'radioisotopic calibration of bio- and magnetostratigraphy, Palaeogeography,
 #'Palaeoclimatology, Palaeoecology, Volume 576, 2021, 110487, ISSN 0031-0182,
-#'<\doi{doi:10.1016/j.palaeo.2021.110487}>
+#'<doi:10.1016/j.palaeo.2021.110487>
 #'
 #'
 #'@examples
@@ -44,7 +44,7 @@
 #'id <- c("CCT18_322", "CCT18_315", "CCT18_311")
 #' ages <- c(20158, 20575, 20857)
 #' ageSds <- c(28, 40, 34)
-#' position <- c(10.2, 6.1, 3.2)
+#' position <- c(14, 7.25, 5.1)
 #' thickness <- c(0.2, 0.1, 0.1)
 #' calCurves <- rep("G", length(ages))
 #' ash_Bisc <- as.data.frame(cbind(id, ages, ageSds, position, thickness, calCurves))
@@ -182,7 +182,7 @@
 #'  wt_list = wt_list_bisc,
 #'  data_track = data_track_bisc,
 #'  x_axis = x_axis_bisc,
-#'  nr_simulations = 1000,
+#'  nr_simulations = 20,
 #'  seed_nr = 1337,
 #'  verbose = TRUE,
 #'  genplot = TRUE,
@@ -211,14 +211,14 @@
 #'retrack <- retrack[[1]]
 #'
 #'
-#'astro_bchron_res <- astro_bchron(age_constraints = ash_Bisc,
-#'n_simulations = 10,
-#'track_period_incl_sd = retrack,
-#'tracked_cycle_period = 110,
-#'tracked_cycle_period_unc = 21,
-#'tracked_cycle_period_unc_dist = "u",
-#'output=1,
-#'run_multicore = FALSE)}
+#'#astro_bchron_res <- astro_bchron(age_constraints = ash_Bisc,
+#'#n_simulations = 10,
+#'#track_period_incl_sd = retrack,
+#'#tracked_cycle_period = 110,
+#'#tracked_cycle_period_unc = 21,
+#'#tracked_cycle_period_unc_dist = "u",
+#'#output=1,
+#'#run_multicore = FALSE)}
 #'
 #'
 #'@return
@@ -242,6 +242,9 @@
 #' @importFrom utils setTxtProgressBar
 #' @importFrom tcltk setTkProgressBar
 #' @importFrom tcltk setTkProgressBar
+#' @importFrom matrixStats rowQuantiles
+#' @importFrom foreach foreach
+#' @importFrom foreach %dopar%
 
 
 astro_bchron <- function(age_constraints = NULL,
@@ -253,20 +256,24 @@ astro_bchron <- function(age_constraints = NULL,
                               output=1,
                               run_multicore = FALSE) {
   ash <- age_constraints
-
   multi_tracked <- track_period_incl_sd
-
   age_curves <- matrix(data = NA,
                        nrow = nrow(multi_tracked),
                        ncol = n_simulations)
   new_curve <- multi_tracked[, c(1, 2)]
+validator <- rep(1,times=ncol(age_curves))
 
   for (i in 1:ncol(age_curves)) {
+    while(validator[i]==1){
+    new_curve <- multi_tracked[, c(1, 2)]
     val <-rnorm(1, mean = multi_tracked[1, 2], sd = multi_tracked[1, 3])
-    pnorm_val <- pnorm(val, mean = multi_tracked[1, 2], sd = multi_tracked[1, 3])
+    pnorm_val <- 1-pnorm(val, mean = multi_tracked[1, 2],
+                       sd = multi_tracked[1, 3],lower.tail = FALSE)
+
     for (j in 1:nrow(new_curve)) {
-      new_curve[j, 2] <- qnorm(pnorm_val, mean = multi_tracked[j, 2], sd = multi_tracked[j, 3])
+      new_curve[j, 2] <- 1/(qnorm(pnorm_val, mean = multi_tracked[j, 2], sd = multi_tracked[j, 3]))
     }
+
 
     if (tracked_cycle_period_unc_dist == "u"){
     tracked_cycle_period_new <- runif(1, min = tracked_cycle_period-tracked_cycle_period_unc, max = tracked_cycle_period+tracked_cycle_period_unc)
@@ -285,16 +292,18 @@ astro_bchron <- function(age_constraints = NULL,
 
     age_curves[, i] <-
       time_curve[, 2]
+
+    dif_mat <- time_curve[2:(nrow(time_curve)),2]-time_curve[1:(nrow(time_curve)-1),2]
+    dif_mat_min <- min(dif_mat)
+
+    if (dif_mat_min>0){
+      validator[i] <- 0
+      }
+    }
   }
 
   ash$postime <- as.numeric(ash$ages) - as.numeric(ash$ages[1])
 
-  retrack_1_time <- curve2time(
-    tracked_cycle_curve = multi_tracked[, c(1, 2)],
-    tracked_cycle_period = tracked_cycle_period,
-    genplot = TRUE,
-    keep_editable = FALSE
-  )
 
   ash$pos_time_rand <- NA
   ash_2 <- ash
@@ -481,8 +490,7 @@ astro_bchron <- function(age_constraints = NULL,
     j <- 1
     numCores <- detectCores()
     cl <- makeCluster(numCores - 2)
-    registerDoSNOW(cl)
-
+    doSNOW::registerDoSNOW(cl)
     pb <- txtProgressBar(max = n_simulations, style = 3)
     progress <- function(n)
       setTxtProgressBar(pb, n)
@@ -502,7 +510,7 @@ astro_bchron <- function(age_constraints = NULL,
       distTypes = ash[, 6]
       iterations = 5000
       burn = 1000
-      probability = 0.95
+      probability = 0.99
       predictPositions = age_curves[, j]
       truncateUp = 0
       extrapUp = 1000
@@ -1122,8 +1130,8 @@ astro_bchron <- function(age_constraints = NULL,
   }
 
   if (output == 2) {
-    res <- run_multicore[,1]
-    res <- cbind(res, quantile(res_ages,probs=c(0.025,0.373,0.5,0.6827,0.975),na.rm=TRUE))
+    res <- multi_tracked[,1]
+    res <- cbind(res, rowQuantiles(res_ages,probs=c(0.025,0.373,0.5,0.6827,0.975),na.rm=TRUE))
   }
 
 

@@ -29,9 +29,9 @@ column 6: calCurve values assign as "G" for a Gaussian distribution}
 \item{n_simulations}{number of simulation runs}
 
 \item{track_period_incl_sd}{A matrix of 3 columns in which the first column
-is depth/height.The second column is the period of the tracked cycle.
+is depth/height.The second column is the frequency of the tracked cycle.
 The thirds column is uncertainty given as 1 standard deviation for the
-period of the tracked cycle}
+frequency of the tracked cycle}
 
 \item{tracked_cycle_period}{period in time of the tracked cycle}
 
@@ -65,7 +65,7 @@ the R package "Bchron and modifiedBChron " (Haslett and Parnell, 2008) and (Tray
 id <- c("CCT18_322", "CCT18_315", "CCT18_311")
 ages <- c(20158, 20575, 20857)
 ageSds <- c(28, 40, 34)
-position <- c(10.2, 6.1, 3.2)
+position <- c(14, 7.25, 5.1)
 thickness <- c(0.2, 0.1, 0.1)
 calCurves <- rep("G", length(ages))
 ash_Bisc <- as.data.frame(cbind(id, ages, ageSds, position, thickness, calCurves))
@@ -203,7 +203,7 @@ retrack <- retrack_wt_MC(
  wt_list = wt_list_bisc,
  data_track = data_track_bisc,
  x_axis = x_axis_bisc,
- nr_simulations = 1000,
+ nr_simulations = 20,
  seed_nr = 1337,
  verbose = TRUE,
  genplot = TRUE,
@@ -232,14 +232,14 @@ retrack <- retrack_wt_MC(
 retrack <- retrack[[1]]
 
 
-astro_bchron_res <- astro_bchron(age_constraints = ash_Bisc,
-n_simulations = 10,
-track_period_incl_sd = retrack,
-tracked_cycle_period = 110,
-tracked_cycle_period_unc = 21,
-tracked_cycle_period_unc_dist = "u",
-output=1,
-run_multicore = FALSE)}
+#astro_bchron_res <- astro_bchron(age_constraints = ash_Bisc,
+#n_simulations = 10,
+#track_period_incl_sd = retrack,
+#tracked_cycle_period = 110,
+#tracked_cycle_period_unc = 21,
+#tracked_cycle_period_unc_dist = "u",
+#output=1,
+#run_multicore = FALSE)}
 
 
 }
@@ -249,5 +249,5 @@ Rodolfo Coccioni,High-precision U-Pb zircon geochronology of the Miocene
 Bisciaro Formation, Contessa Section, Italy: A case study for requisite
 radioisotopic calibration of bio- and magnetostratigraphy, Palaeogeography,
 Palaeoclimatology, Palaeoecology, Volume 576, 2021, 110487, ISSN 0031-0182,
-<\doi{doi:10.1016/j.palaeo.2021.110487}>
+<doi:10.1016/j.palaeo.2021.110487>
 }

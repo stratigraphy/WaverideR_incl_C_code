@@ -93,7 +93,7 @@ mag_track <- track_period_wavelet(astro_cycle = 405,
 }
 \references{
 Routines for astrochronologic testing, astronomical time scale construction, and
-time series analysis <\doi{doi:10.1016/j.earscirev.2018.11.015}>
+time series analysis <doi:10.1016/j.earscirev.2018.11.015>
 }
 \author{
 The function is based/inspired on the \link[astrochron]{traceFreq}

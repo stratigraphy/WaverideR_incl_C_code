@@ -36,10 +36,10 @@
 #'@param keep_editable Keep option to add extra features after plotting  \code{Default=FALSE}
 #'@param dev_new Opens a new plotting window to plot the plot, this guarantees a "nice" looking plot however when plotting in an R markdown
 #'document the plot might not plot  \code{Default=TRUE}
-#'@param time_dir The direction of the proxy record which is assumed for tuning if time increases with increasing depth/time values
-#'(e.g. bore hole data which gets older with increasing depth ) then time_dir should be set to TRUE
+#'@param plot_dir The direction of the proxy record which is assumed for tuning if time increases with increasing depth/time values
+#'(e.g. bore hole data which gets older with increasing depth ) then plot_dir should be set to TRUE
 #'if time decreases with depth/time values (eg stratospheric logs where 0m is the bottom of the section)
-#'then time_dir should be set to FALSE \code{time_dir=TRUE}
+#'then plot_dir should be set to FALSE \code{plot_dir=TRUE}
 #'@param add_lines Add  lines to the wavelet plot input should be matrix with first axis being depth/time the columns after that
 #'should be period values  \code{Default=NULL}
 #'@param add_points Add points to the wavelet plot input should be matrix with first axis being depth/time and columns after that
@@ -83,14 +83,14 @@
 #'Morlet, Jean, Georges Arens, Eliane Fourgeau, and Dominique Glard.
 #'"Wave propagation and sampling theory—Part I: Complex signal and scattering in multilayered media.
 #'" Geophysics 47, no. 2 (1982): 203-221.
-#' \doi{<doi:10.1190/1.1441328>}
+#'\url{https://pubs.geoscienceworld.org/geophysics/article/47/2/203/68601/Wave-propagation-and-sampling-theory-Part-I}
 #'
 #'J. Morlet, G. Arens, E. Fourgeau, D. Giard;
 #' Wave propagation and sampling theory; Part II, Sampling theory and complex waves.
-#'  Geophysics 1982 47 (2): 222–236. <\doi{doi:10.1190/1.1441329}>
+#'  Geophysics 1982 47 (2): 222–236. \url{https://pubs.geoscienceworld.org/geophysics/article/47/2/222/68604/Wave-propagation-and-sampling-theory-Part-II}
 #'
 #'S.R. Meyers, 2012, Seeing Red in Cyclic Stratigraphy: Spectral Noise Estimation for
-#'Astrochronology: Paleoceanography, 27, PA3228, <\doi{doi:10.1029/2012PA002307}>
+#'Astrochronology: Paleoceanography, 27, PA3228, <doi:10.1029/2012PA002307>
 #'
 #' @examples
 #' \donttest{
@@ -120,7 +120,7 @@
 #'  x_lab = "depth (metres)",
 #'  keep_editable = FALSE,
 #'  dev_new=TRUE,
-#'  time_dir = TRUE,
+#'  plot_dir = TRUE,
 #'  add_lines = NULL,
 #'  add_points= NULL,
 #'  add_abline_h = NULL,
@@ -161,7 +161,7 @@
 #'x_lab = "depth (metres)",
 #'keep_editable = FALSE,
 #'dev_new=TRUE,
-#'time_dir = TRUE,
+#'plot_dir = TRUE,
 #'add_lines= NULL,
 #'add_points= NULL,
 #'add_abline_h = NULL,
@@ -203,7 +203,7 @@
 #'x_lab = "depth (metres)",
 #'keep_editable = FALSE,
 #'dev_new=TRUE,
-#'time_dir = TRUE,
+#'plot_dir = TRUE,
 #'add_lines = NULL,
 #'add_points= NULL,
 #'add_abline_h = NULL,
@@ -230,6 +230,7 @@
 #' @importFrom graphics text
 #' @importFrom graphics box
 #' @importFrom graphics polygon
+#' @importFrom graphics layout
 #' @importFrom graphics title
 #' @importFrom grDevices rgb
 #' @importFrom WaveletComp analyze.wavelet
@@ -293,6 +294,7 @@
 #' @importFrom grDevices cm.colors
 #' @importFrom grDevices hcl.colors
 
+
 plot_wavelet <- function(wavelet = NULL,
                          lowerPeriod = NULL,
                          upperPeriod = NULL,
@@ -305,7 +307,7 @@ plot_wavelet <- function(wavelet = NULL,
                          x_lab = "depth (metres)",
                          keep_editable = FALSE,
                          dev_new=TRUE,
-                         time_dir = TRUE,
+                         plot_dir = TRUE,
                          add_lines = NULL,
                          add_points= NULL,
                          add_abline_h = NULL,
@@ -321,7 +323,7 @@ plot_wavelet <- function(wavelet = NULL,
                          tbw_mtm = 3,
                          plot_horizontal = TRUE) {
 
-    if (keep_editable == FALSE) {
+  if (keep_editable == FALSE) {
     oldpar <- par(no.readonly = TRUE)
     on.exit(par(oldpar))
   }
@@ -449,7 +451,7 @@ plot_wavelet <- function(wavelet = NULL,
 
   }
 
-  if (time_dir != TRUE) {
+  if (plot_dir != TRUE) {
     xlim_vals = rev(c(min(wavelet$x), max(wavelet$x)))
   } else{
     xlim_vals = c(min(wavelet$x), max(wavelet$x))
@@ -474,10 +476,10 @@ plot_wavelet <- function(wavelet = NULL,
                             nrow = 2,
                             ncol = 2 ,
                             byrow = TRUE)
-    layout(mat = layout.matrix,
-           heights = c(1, 0.25),
-           # Heights of the two rows
-           widths = c(1, 4))
+    graphics::layout(mat = layout.matrix,
+                     heights = c(1, 0.25),
+                     # Heights of the two rows
+                     widths = c(1, 4))
 
     power_max_mat.levels = quantile(pmax_avg_sel,
                                     probs = seq(
@@ -607,7 +609,7 @@ plot_wavelet <- function(wavelet = NULL,
 
     if (is.null(add_points) != TRUE) {
       for (i  in 2:ncol(add_points))
-        lines(y=add_points[, 1], x=log2(add_points[, i]))
+        points(y=add_points[, 1], x=log2(add_points[, i]))
     }
 
 
@@ -634,10 +636,10 @@ plot_wavelet <- function(wavelet = NULL,
                             nrow = 2,
                             ncol = 1 ,
                             byrow = TRUE)
-    layout(mat = layout.matrix,
-           heights = c(1, 4),
-           # Heights of the two rows
-           widths = c(1))
+    graphics::layout(mat = layout.matrix,
+                     heights = c(1, 4),
+                     # Heights of the two rows
+                     widths = c(1))
 
     power_max_mat.levels = quantile(pmax_avg_sel,
                                     probs = seq(
@@ -748,7 +750,7 @@ plot_wavelet <- function(wavelet = NULL,
 
     if (is.null(add_points) != TRUE) {
       for (i  in 2:ncol(add_points))
-        lines(y=add_points[, 1], x=log2(add_points[, i]))
+        points(y=add_points[, 1], x=log2(add_points[, i]))
     }
 
 
@@ -776,10 +778,10 @@ plot_wavelet <- function(wavelet = NULL,
                             nrow = 4,
                             ncol = 2 ,
                             byrow = TRUE)
-    layout(mat = layout.matrix,
-           heights = c(1, 1,1,4),
-           # Heights of the two rows
-           widths = c(4, 1))
+    graphics::layout(mat = layout.matrix,
+                     heights = c(1, 1,1,4),
+                     # Heights of the two rows
+                     widths = c(4, 1))
 
     power_max_mat.levels = quantile(pmax_avg_sel,
                                     probs = seq(
@@ -978,7 +980,7 @@ plot_wavelet <- function(wavelet = NULL,
 
     if (is.null(add_points) != TRUE) {
       for (i  in 2:ncol(add_points))
-        lines(y=add_points[, 1], x=log2(add_points[, i]))
+        points(y=add_points[, 1], x=log2(add_points[, i]))
     }
 
 
@@ -1005,10 +1007,10 @@ plot_wavelet <- function(wavelet = NULL,
                             nrow = 5,
                             ncol = 2 ,
                             byrow = TRUE)
-    layout(mat = layout.matrix,
-           heights = c(1, 1,1,1,4),
-           # Heights of the two rows
-           widths = c(4, 1))
+    graphics::layout(mat = layout.matrix,
+                     heights = c(1, 1,1,1,4),
+                     # Heights of the two rows
+                     widths = c(4, 1))
 
     power_max_mat.levels = quantile(pmax_avg_sel,
                                     probs = seq(
@@ -1222,7 +1224,7 @@ plot_wavelet <- function(wavelet = NULL,
 
     if (is.null(add_points) != TRUE) {
       for (i  in 2:ncol(add_points))
-        lines(y=add_points[, 1], x=log2(add_points[, i]))
+        points(y=add_points[, 1], x=log2(add_points[, i]))
     }
 
 
@@ -1250,10 +1252,10 @@ plot_wavelet <- function(wavelet = NULL,
                             nrow = 5,
                             ncol = 2 ,
                             byrow = TRUE)
-    layout(mat = layout.matrix,
-           heights = c(1, 1,1,1,4),
-           # Heights of the two rows
-           widths = c(1, 4))
+    graphics::layout(mat = layout.matrix,
+                     heights = c(1, 1,1,1,4),
+                     # Heights of the two rows
+                     widths = c(1, 4))
 
     power_max_mat.levels = quantile(pmax_avg_sel,
                                     probs = seq(
@@ -1262,7 +1264,7 @@ plot_wavelet <- function(wavelet = NULL,
                                       length.out = n.levels + 1
                                     ))
 
-    par(mar = c(0, 1, 2, 6),xpd=NA)
+    par(mar = c(0, 1, 2, 6),xpd=FALSE)
 
 
     image(
@@ -1488,7 +1490,7 @@ plot_wavelet <- function(wavelet = NULL,
 
     if (is.null(add_points) != TRUE) {
       for (i  in 2:ncol(add_points))
-        lines(y=add_points[, 1], x=log2(add_points[, i]))
+        points(y=add_points[, 1], x=log2(add_points[, i]))
     }
 
 
@@ -1516,10 +1518,10 @@ plot_wavelet <- function(wavelet = NULL,
                             nrow = 2,
                             ncol = 2 ,
                             byrow = TRUE)
-    layout(mat = layout.matrix,
-           heights = c(1, 4),
-           # Heights of the two rows
-           widths = c(1, 4))
+    graphics::layout(mat = layout.matrix,
+                     heights = c(1, 4),
+                     # Heights of the two rows
+                     widths = c(1, 4))
 
     power_max_mat.levels = quantile(pmax_avg_sel,
                                     probs = seq(
@@ -1578,7 +1580,7 @@ plot_wavelet <- function(wavelet = NULL,
     title(ylab="Wt. power",xpd=NA)
 
 
-    par( mar = c(4, 4, 0, 0))
+    par(mar = c(4, 4, 0, 0),xpd=TRUE)
 
 
     plot(
@@ -1594,7 +1596,7 @@ plot_wavelet <- function(wavelet = NULL,
     )
 
 
-    par(new = FALSE, mar = c(4, 0, 0, 2))
+    par(new = FALSE, mar = c(4, 0, 0, 2),xpd=FALSE)
 
     image(
       y = wavelet$x,
@@ -1669,7 +1671,7 @@ plot_wavelet <- function(wavelet = NULL,
 
     if (is.null(add_points) != TRUE) {
       for (i  in 2:ncol(add_points))
-        lines(y=add_points[, 1], x=log2(add_points[, i]))
+        points(y=add_points[, 1], x=log2(add_points[, i]))
     }
 
 
@@ -1697,10 +1699,10 @@ plot_wavelet <- function(wavelet = NULL,
                             nrow = 4,
                             ncol = 2 ,
                             byrow = TRUE)
-    layout(mat = layout.matrix,
-           heights = c(1, 1,1,4),
-           # Heights of the two rows
-           widths = c(1, 4))
+    graphics::layout(mat = layout.matrix,
+                     heights = c(1, 1,1,4),
+                     # Heights of the two rows
+                     widths = c(1, 4))
 
     power_max_mat.levels = quantile(pmax_avg_sel,
                                     probs = seq(
@@ -1922,7 +1924,7 @@ plot_wavelet <- function(wavelet = NULL,
 
     if (is.null(add_points) != TRUE) {
       for (i  in 2:ncol(add_points))
-        lines(y=add_points[, 1], x=log2(add_points[, i]))
+        points(y=add_points[, 1], x=log2(add_points[, i]))
     }
 
 
@@ -1949,10 +1951,10 @@ plot_wavelet <- function(wavelet = NULL,
                             nrow = 2,
                             ncol = 2 ,
                             byrow = TRUE)
-    layout(mat = layout.matrix,
-           heights = c(1,4),
-           # Heights of the two rows
-           widths = c(1, 4))
+    graphics::layout(mat = layout.matrix,
+                     heights = c(1,4),
+                     # Heights of the two rows
+                     widths = c(1, 4))
 
     power_max_mat.levels = quantile(pmax_avg_sel,
                                     probs = seq(
@@ -2083,7 +2085,7 @@ plot_wavelet <- function(wavelet = NULL,
 
     if (is.null(add_points) != TRUE) {
       for (i  in 2:ncol(add_points))
-        lines(y=add_points[, 1], x=log2(add_points[, i]))
+        points(y=add_points[, 1], x=log2(add_points[, i]))
     }
 
 
@@ -2113,10 +2115,10 @@ plot_wavelet <- function(wavelet = NULL,
       ncol = 9 ,
       byrow = TRUE
     )
-    layout(mat = layout.matrix,
-           heights = c(0.25, 1),
-           # Heights of the two rows
-           widths = c(1))
+    graphics::layout(mat = layout.matrix,
+                     heights = c(0.25, 1),
+                     # Heights of the two rows
+                     widths = c(1))
 
     power_max_mat.levels = quantile(pmax_avg_sel,
                                     probs = seq(
@@ -2236,7 +2238,7 @@ plot_wavelet <- function(wavelet = NULL,
 
     if (is.null(add_points) != TRUE) {
       for (i  in 2:ncol(add_points))
-        lines(add_points[, 1], log2(add_points[, i]))
+        points(add_points[, 1], log2(add_points[, i]))
     }
 
 
@@ -2344,10 +2346,10 @@ plot_wavelet <- function(wavelet = NULL,
                             nrow = 2,
                             ncol = 2 ,
                             byrow = TRUE)
-    layout(mat = layout.matrix,
-           heights = c(0.25, 1),
-           # Heights of the two rows
-           widths = c(8, 2))
+    graphics::layout(mat = layout.matrix,
+                     heights = c(0.25, 1),
+                     # Heights of the two rows
+                     widths = c(8, 2))
 
     power_max_mat.levels = quantile(pmax_avg_sel,
                                     probs = seq(
@@ -2426,7 +2428,7 @@ plot_wavelet <- function(wavelet = NULL,
 
 
 
-    par(new = FALSE, mar = c(4, 4, 0, 0))
+    par(new = FALSE, mar = c(4, 4, 0, 0),xpd=FALSE)
 
     image(
       x = wavelet$x,
@@ -2493,7 +2495,7 @@ plot_wavelet <- function(wavelet = NULL,
 
     if (is.null(add_points) != TRUE) {
       for (i  in 2:ncol(add_points))
-        lines(add_points[, 1], log2(add_points[, i]))
+        points(add_points[, 1], log2(add_points[, i]))
     }
 
 
@@ -2520,10 +2522,10 @@ plot_wavelet <- function(wavelet = NULL,
                             nrow = 2,
                             ncol = 2 ,
                             byrow = TRUE)
-    layout(mat = layout.matrix,
-           heights = c(0.25, 1),
-           # Heights of the two rows
-           widths = c(8, 2))
+    graphics::layout(mat = layout.matrix,
+                     heights = c(0.25, 1),
+                     # Heights of the two rows
+                     widths = c(8, 2))
 
     power_max_mat.levels = quantile(pmax_avg_sel,
                                     probs = seq(
@@ -2646,7 +2648,7 @@ plot_wavelet <- function(wavelet = NULL,
 
     if (is.null(add_points) != TRUE) {
       for (i  in 2:ncol(add_points))
-        lines(add_points[, 1], log2(add_points[, i]))
+        points(add_points[, 1], log2(add_points[, i]))
     }
 
 
@@ -2675,10 +2677,10 @@ plot_wavelet <- function(wavelet = NULL,
       ncol = 10 ,
       byrow = TRUE
     )
-    layout(mat = layout.matrix,
-           heights = c(0.25, 1),
-           # Heights of the two rows
-           widths = c(1))
+    graphics::layout(mat = layout.matrix,
+                     heights = c(0.25, 1),
+                     # Heights of the two rows
+                     widths = c(1))
 
     power_max_mat.levels = quantile(pmax_avg_sel,
                                     probs = seq(
@@ -2801,7 +2803,7 @@ plot_wavelet <- function(wavelet = NULL,
 
     if (is.null(add_points) != TRUE) {
       for (i  in 2:ncol(add_points))
-        lines(add_points[, 1], log2(add_points[, i]))
+        points(add_points[, 1], log2(add_points[, i]))
     }
 
 
@@ -2931,10 +2933,10 @@ plot_wavelet <- function(wavelet = NULL,
                             nrow = 1,
                             ncol = 3 ,
                             byrow = TRUE)
-    layout(mat = layout.matrix,
-           heights = c(1),
-           # Heights of the two rows
-           widths = c(6, 1, 1))
+    graphics::layout(mat = layout.matrix,
+                     heights = c(1),
+                     # Heights of the two rows
+                     widths = c(6, 1, 1))
 
     power_max_mat.levels = quantile(pmax_avg_sel,
                                     probs = seq(
@@ -3064,7 +3066,7 @@ plot_wavelet <- function(wavelet = NULL,
 
     if (is.null(add_points) != TRUE) {
       for (i  in 2:ncol(add_points))
-        lines(add_points[, 1], log2(add_points[, i]))
+        points(add_points[, 1], log2(add_points[, i]))
     }
 
     if (add_MTM_peaks == TRUE) {
@@ -3095,7 +3097,7 @@ plot_wavelet <- function(wavelet = NULL,
              nrow = 1,
              ncol = 6 ,
              byrow = TRUE)
-    layout(
+    graphics::layout(
       mat = layout.matrix,
       heights = c(1),
       # Heights of the two rows
@@ -3309,7 +3311,7 @@ plot_wavelet <- function(wavelet = NULL,
 
     if (is.null(add_points) != TRUE) {
       for (i  in 2:ncol(add_points))
-        lines(add_points[, 1], log2(add_points[, i]))
+        points(add_points[, 1], log2(add_points[, i]))
     }
 
 
@@ -3336,7 +3338,7 @@ plot_wavelet <- function(wavelet = NULL,
              nrow = 1,
              ncol = 5 ,
              byrow = TRUE)
-    layout(
+    graphics::layout(
       mat = layout.matrix,
       heights = c(1),
       # Heights of the two rows
@@ -3528,7 +3530,7 @@ plot_wavelet <- function(wavelet = NULL,
 
     if (is.null(add_points) != TRUE) {
       for (i  in 2:ncol(add_points))
-        lines(add_points[, 1], log2(add_points[, i]))
+        points(add_points[, 1], log2(add_points[, i]))
     }
 
 
@@ -3553,10 +3555,10 @@ plot_wavelet <- function(wavelet = NULL,
                             nrow = 1,
                             ncol = 2 ,
                             byrow = TRUE)
-    layout(mat = layout.matrix,
-           heights = c(1),
-           # Heights of the two rows
-           widths = c(10, 2.25))
+    graphics::layout(mat = layout.matrix,
+                     heights = c(1),
+                     # Heights of the two rows
+                     widths = c(10, 2.25))
 
     power_max_mat.levels = quantile(pmax_avg_sel,
                                     probs = seq(
@@ -3658,7 +3660,7 @@ plot_wavelet <- function(wavelet = NULL,
 
     if (is.null(add_points) != TRUE) {
       for (i  in 2:ncol(add_points))
-        lines(add_points[, 1], log2(add_points[, i]))
+        points(add_points[, 1], log2(add_points[, i]))
     }
 
     if (add_MTM_peaks == TRUE) {
@@ -3676,11 +3678,12 @@ plot_wavelet <- function(wavelet = NULL,
     }
 
 
-
-
   }
 
   if (add_MTM_peaks == TRUE) {
     return(invisible(mtm_res))
   }
 }
+
+
+
