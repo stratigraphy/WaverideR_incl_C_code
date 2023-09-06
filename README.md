@@ -15,10 +15,10 @@ age-models and identify and interpret cyclicity in past en present climate syste
 
 ## Installation
 
-You can install the development version of WaverideR_incl_C_code from [GitHub](https://github.com/stratigraphy/WaverideR) with:
+You can install the development version of WaverideR_incl_C_code from [GitHub](https://github.com/stratigraphy/WaverideR_incl_C_code) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("stratigraphy/WaverideR")
+devtools::install_github("stratigraphy/WaverideR_incl_C_code")
 ```
 
