@@ -1,6 +1,10 @@
-# WaverideR
+# WaverideR_incl_C_code
 
-The 'Waverider' R package uses the continuous wavelet transform to analyze cyclostratigraphic data.
+
+WaverideR_incl_C_code is a modified version of the WaverideR R package which
+includes C based code 
+
+The 'WaverideR_incl_C_code' R package uses the continuous wavelet transform to analyze cyclostratigraphic data.
 The continuous wavelet transform enables the observation of transient/non-stationary
 cyclicity in time-series. The goal of cyclostratigraphic studies is to define frequency/period
 in the depth/time domain. By conducting the continuous wavelet transform on cyclostratigraphic
@@ -11,7 +15,7 @@ age-models and identify and interpret cyclicity in past en present climate syste
 
 ## Installation
 
-You can install the development version of WaverideR from [GitHub](https://github.com/stratigraphy/WaverideR) with:
+You can install the development version of WaverideR_incl_C_code from [GitHub](https://github.com/stratigraphy/WaverideR) with:
 
 ``` r
 # install.packages("devtools")

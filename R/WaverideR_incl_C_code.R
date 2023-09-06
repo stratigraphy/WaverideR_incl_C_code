@@ -1,4 +1,4 @@
-#' @name WaverideR
+#' @name WaverideR_incl_C_code
 #' @title Extracting Signals from Wavelet Spectra
 #' @description The continuous wavelet transform enables the observation of
 #' transient/non-stationary cyclicity in time-series. The goal of
