@@ -1,5 +1,5 @@
 #' @title Example data sets for the 'WaverideR' package
-#' @name WaverideR_Datasets
+#' @name WaverideR_incl_C_code_Datasets
 #' @description Data sets for testing the 'WaverideR' R package:\cr
 #' The \code{age_model_zeeden} data set is and age model (anchor points) for\cr
 #' the IODP 926 grey scale (154-174m) record of Zeeden et al., (2013)\cr
